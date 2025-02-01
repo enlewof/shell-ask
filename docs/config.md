@@ -1,6 +1,6 @@
 # Config
 
-You can create a global config file at `~/.config/shell-ask/config.json`, or a local config file at `./shell-ask.json` in a folder where you want to run Shell Ask.
+You can create a global config file at `~/.config/shell-ask/config.json`, or a local config file at `./shell-ask.json` in a folder where you want to run Shell Ask. `.toml` files are also supported.
 
 ## Example
 

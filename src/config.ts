@@ -1,10 +1,11 @@
+import JoyCon from "joycon"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
+import toml from "smol-toml"
 import { z } from "zod"
 
 export const configDirPath = path.join(os.homedir(), ".config", "shell-ask")
-export const configFilePath = path.join(configDirPath, "config.json")
 
 const AICommandVariableSchema = z.union([
   z.string().describe("a shell command to run"),
@@ -86,32 +87,35 @@ export const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>
 
-function loadGlobalConfig(): Config {
-  try {
-    return JSON.parse(fs.readFileSync(configFilePath, "utf-8"))
-  } catch {
-    return {}
-  }
-}
-
-function loadLocalConfig(): Config {
-  try {
-    return JSON.parse(fs.readFileSync("shell-ask.json", "utf-8"))
-  } catch {
-    return {}
-  }
-}
-
 export function loadConfig(): Config {
-  const globalConfig = loadGlobalConfig()
-  const localConfig = loadLocalConfig()
+  const joycon = new JoyCon()
+
+  joycon.addLoader({
+    test: /\.toml$/,
+    loadSync: (filepath) => {
+      const content = fs.readFileSync(filepath, "utf-8")
+      return toml.parse(content)
+    },
+  })
+
+  const globalConfig = joycon.loadSync(
+    ["config.json", "config.toml"],
+    configDirPath,
+    path.dirname(configDirPath)
+  ).data as Config | undefined
+
+  const localConfig = joycon.loadSync(
+    ["shell-ask.json", "shell-ask.toml"],
+    process.cwd(),
+    path.dirname(process.cwd())
+  ).data as Config | undefined
 
   return {
     ...globalConfig,
     ...localConfig,
     commands: [
-      ...(globalConfig.commands || []),
-      ...(localConfig.commands || []),
+      ...(globalConfig?.commands || []),
+      ...(localConfig?.commands || []),
     ],
   }
 }
