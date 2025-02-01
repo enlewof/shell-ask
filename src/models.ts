@@ -30,6 +30,9 @@ export const MODEL_MAP: {
     {
       id: "openai-o1-preview",
     },
+    {
+      id: "openai-o3-mini",
+    },
   ],
   claude: [
     {
