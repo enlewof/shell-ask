@@ -129,6 +129,10 @@ export const MODEL_MAP: {
       realId: "o1-preview",
     },
     {
+      id: "copilot-o3-mini",
+      realId: "o3-mini",
+    },
+    {
       id: "copilot-claude-3.5-sonnet",
       realId: "claude-3.5-sonnet",
     },
