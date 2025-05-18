@@ -115,17 +115,29 @@ export async function ask(
         .join(", ")}`
     )
   }
-  const realModelId = matchedModel?.realId || modelId
+  const realModelId = matchedModel.realId || modelId
   const model = await getSDKModel(modelId, config)
 
   debug("model", realModelId)
+
+  const isOpenAIReasoning = /-o\d+/.test(matchedModel.id)
+  const isCopilotOpenAIReasoning = /copilot-o\d+/.test(matchedModel.id)
+  const isCopilotOpenAIO1 = /copilot-o1/.test(matchedModel.id)
 
   const files = await loadFiles(options.files || [])
   const remoteContents = await fetchUrl(options.url || [])
   const context = [
     // inhert prev chat
+    !chat &&
+      isOpenAIReasoning &&
+      (isCopilotOpenAIReasoning
+        ? // copilot openai doesn't support the special syntax, so this is a workaround
+          `Using markdown formatting if necessary`
+        : // special syntax to re-enable markdown formatting
+          `Formatting re-enabled`),
     !chat && `Context:`,
-    !chat && `shell: ${process.env.SHELL || "unknown"}`,
+    !chat &&
+      `platform: ${process.platform}\nshell: ${process.env.SHELL || "unknown"}`,
 
     options.pipeInput && [`stdin:`, "```", options.pipeInput, "```"].join("\n"),
 
@@ -152,7 +164,8 @@ export async function ask(
   const prevSystemMessage = chat?.messages[0]
 
   messages.push({
-    role: "system",
+    // using system message with copilot openai reasoning models results in Bad Request
+    role: isCopilotOpenAIReasoning ? "user" : "system",
     content:
       (prevSystemMessage?.content ? `${prevSystemMessage.content}\n` : "") +
       [context, searchResult && "search result:", searchResult]
@@ -197,7 +210,8 @@ export async function ask(
   const temperature = 0
   const providerModelId = toProviderModelId(realModelId)
 
-  if (options.stream === false) {
+  // Copilot O1 doesn't support streaming yet
+  if (options.stream === false || isCopilotOpenAIO1) {
     const result = await generateText({
       model: model(providerModelId),
       messages,
@@ -210,7 +224,7 @@ export async function ask(
     process.exit()
   }
 
-  const { textStream } = await streamText({
+  const { textStream } = streamText({
     model: model(providerModelId),
     messages,
     temperature,

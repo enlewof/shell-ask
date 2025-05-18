@@ -22,10 +22,16 @@ export const MODEL_MAP: {
   ],
   openai: [
     {
+      id: "openai-o1",
+    },
+    {
       id: "openai-o1-mini",
     },
     {
       id: "openai-o1-preview",
+    },
+    {
+      id: "openai-o3-mini",
     },
   ],
   claude: [
@@ -52,6 +58,14 @@ export const MODEL_MAP: {
   ],
   gemini: [
     {
+      id: "gemini-2.0-flash",
+      realId: "gemini-2.0-flash-exp",
+    },
+    {
+      id: "gemini-2.0-flash-thinking",
+      realId: "gemini-2.0-flash-thinking-exp",
+    },
+    {
       id: "gemini-1.5-pro",
       realId: "gemini-1.5-pro-latest",
     },
@@ -64,6 +78,14 @@ export const MODEL_MAP: {
     },
   ],
   groq: [
+    {
+      id: "groq-llama-3.3-70b",
+      realId: "groq-llama-3.3-70b-versatile",
+    },
+    {
+      id: "groq-llama-3.1-8b",
+      realId: "groq-llama-3.1-8b-instant",
+    },
     {
       id: "groq-llama3",
       realId: "groq-llama3-70b-8192",
@@ -105,6 +127,10 @@ export const MODEL_MAP: {
     {
       id: "copilot-o1-preview",
       realId: "o1-preview",
+    },
+    {
+      id: "copilot-o3-mini",
+      realId: "o3-mini",
     },
     {
       id: "copilot-claude-3.5-sonnet",

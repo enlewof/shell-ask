@@ -6,6 +6,7 @@ import { createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { CliError } from "./error"
 import { copilot } from "./copilot"
+import { getOllamaBaseURL } from "./ollama"
 
 const missingConfigError = (
   type: "openai" | "anthropic" | "gemini" | "groq"
@@ -17,7 +18,9 @@ const missingConfigError = (
 
 export const getSDKModel = async (modelId: string, config: Config) => {
   if (modelId.startsWith("ollama-")) {
-    return createOllama()
+    return createOllama({
+      baseURL: getOllamaBaseURL(config),
+    })
   }
 
   if (modelId.startsWith("claude-")) {
@@ -39,7 +42,7 @@ export const getSDKModel = async (modelId: string, config: Config) => {
     const apiUrl =
       config.gemini_api_url ||
       process.env.GEMINI_API_URL ||
-      "https://generativelanguage.googleapis.com/v1beta/models"
+      "https://generativelanguage.googleapis.com/v1beta/"
     return createGoogleGenerativeAI({
       apiKey,
       baseURL: apiUrl,
@@ -52,9 +55,14 @@ export const getSDKModel = async (modelId: string, config: Config) => {
       throw missingConfigError("groq")
     }
 
+    const apiUrl =
+      config.groq_api_url ||
+      process.env.GROQ_API_URL ||
+      "https://api.groq.com/openai/v1"
+
     return createOpenAI({
       apiKey,
-      baseURL: "https://api.groq.com/openai/v1",
+      baseURL: apiUrl,
     })
   }
 
